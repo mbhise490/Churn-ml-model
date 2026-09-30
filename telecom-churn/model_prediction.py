@@ -1,7 +1,5 @@
 import joblib
 
-from shap_explainer import ChurnExplainer
-
 
 class ChurnPredictor:
 
@@ -14,18 +12,11 @@ class ChurnPredictor:
 
         self.preprocessor = self.artifact["preprocessor"]
 
-        self.shap_background = self.artifact["shap_background"]
-
         self.threshold = self.artifact.get("threshold", 0.5)
 
         self.model_name = self.artifact.get("model_name", "Logistic Regression")
 
-        self.model_version = self.artifact.get("model_version","1.0")
-
-        self.explainer = ChurnExplainer(
-            model=self.model,
-            preprocessor=self.preprocessor,
-            background_data=self.shap_background)
+        self.model_version = self.artifact.get("model_version", "1.0")
 
     def preprocess(self, customer_df):
 
@@ -43,7 +34,6 @@ class ChurnPredictor:
 
         return int(probability >= self.threshold)
 
-   
     def get_risk_level(self, probability):
 
         if probability >= 0.70:
@@ -64,13 +54,11 @@ class ChurnPredictor:
 
         risk_level = self.get_risk_level(probability)
 
-        top_features = self.explainer.get_top_features(customer_df, top_n=5)
-
-        return {"churn_probability": round(
-                probability, 4),
-                "prediction": prediction,
-                "churn": ("Yes" if prediction == 1 else "No"),
-                "risk_level": risk_level,
-                "top_churn_factors": top_features,
-                "model_name": self.model_name,
-                "model_version": self.model_version}
+        return {
+            "churn_probability": round(probability, 4),
+            "prediction": prediction,
+            "churn": ("Yes" if prediction == 1 else "No"),
+            "risk_level": risk_level,
+            "model_name": self.model_name,
+            "model_version": self.model_version,
+        }

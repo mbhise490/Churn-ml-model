@@ -14,25 +14,13 @@ data_ingestion = DataIngestion()
 
 predictor = ChurnPredictor(model_path="churn_logistic_regression.joblib")
 
+
 class CustomerData(BaseModel):
-
-    seniorcitizen: int
-
-    partner: str
-    dependents: str
 
     tenure: int
 
-    multiplelines: str
-    internetservice: str
-
     onlinesecurity: str
-    onlinebackup: str
-    deviceprotection: str
     techsupport: str
-
-    streamingtv: str
-    streamingmovies: str
 
     contract: str
 
@@ -40,7 +28,6 @@ class CustomerData(BaseModel):
     paymentmethod: str
 
     monthlycharges: float
-    totalcharges: float
 
 
 @app.get("/")
@@ -71,7 +58,7 @@ def predict(customer: CustomerData):
         return result
 
     except ValueError as e:
-        raise HTTPException(status_code=422,detail=str(e))
+        raise HTTPException(status_code=422, detail=str(e))
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

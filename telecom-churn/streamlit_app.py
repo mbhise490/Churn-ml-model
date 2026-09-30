@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-st.set_page_config(page_title="Telecom Churn Prediction",page_icon="📊",layout="wide")
+st.set_page_config(page_title="Telecom Churn Prediction", page_icon="📊", layout="wide")
 
 
 API_URL = "http://127.0.0.1:8000/predict"
@@ -20,43 +20,15 @@ col1, col2 = st.columns(2)
 
 with col1:
 
-    seniorcitizen = st.selectbox(
-        "Senior Citizen",
-        [0, 1],
-        format_func=lambda x: "Yes" if x == 1 else "No" )
-
-    partner = st.selectbox(
-        "Partner",
-        ["Yes", "No"]
-    )
-
-    dependents = st.selectbox(
-        "Dependents",
-        ["Yes", "No"]
-    )
-
-    multiplelines = st.selectbox(
-        "Multiple Lines",
-        ["Yes", "No", "No phone service"]
-    )
-
-    internetservice = st.selectbox(
-        "Internet Service",
-        ["DSL", "Fiber optic", "No"]
+    tenure = st.number_input(
+        "Tenure (months)",
+        min_value=0,
+        max_value=100,
+        value=5
     )
 
     onlinesecurity = st.selectbox(
         "Online Security",
-        ["Yes", "No", "No internet service"]
-    )
-
-    onlinebackup = st.selectbox(
-        "Online Backup",
-        ["Yes", "No", "No internet service"]
-    )
-
-    deviceprotection = st.selectbox(
-        "Device Protection",
         ["Yes", "No", "No internet service"]
     )
 
@@ -68,14 +40,13 @@ with col1:
 
 with col2:
 
-    streamingtv = st.selectbox(
-        "Streaming TV",
-        ["Yes", "No", "No internet service"]
-    )
-
-    streamingmovies = st.selectbox(
-        "Streaming Movies",
-        ["Yes", "No", "No internet service"]
+    contract = st.selectbox(
+        "Contract",
+        [
+            "Month-to-month",
+            "One year",
+            "Two year"
+        ]
     )
 
     paperlessbilling = st.selectbox(
@@ -93,36 +64,12 @@ with col2:
         ]
     )
 
-    contract = st.selectbox(
-        "Contract",
-        [
-            "Month-to-month",
-            "One year",
-            "Two year"
-        ]
-    )
-
-    tenure = st.number_input(
-        "Tenure (months)",
-        min_value=0,
-        max_value=100,
-        value=5
-    )
-
     monthlycharges = st.number_input(
         "Monthly Charges",
         min_value=0.0,
         value=70.0,
         step=0.01
     )
-
-    totalcharges = st.number_input(
-        "Total Charges",
-        min_value=0.0,
-        value=350.0,
-        step=0.01
-    )
-
 
 
 st.divider()
@@ -135,55 +82,24 @@ predict_button = st.button(
 
 if predict_button:
 
-  
     customer_data = {
-
-        "seniorcitizen": seniorcitizen,
-
-        "partner": partner,
-
-        "dependents": dependents,
-
         "tenure": tenure,
-
-        "multiplelines": multiplelines,
-
-        "internetservice": internetservice,
-
         "onlinesecurity": onlinesecurity,
-
-        "onlinebackup": onlinebackup,
-
-        "deviceprotection": deviceprotection,
-
         "techsupport": techsupport,
-
-        "streamingtv": streamingtv,
-
-        "streamingmovies": streamingmovies,
-
         "contract": contract,
-
         "paperlessbilling": paperlessbilling,
-
         "paymentmethod": paymentmethod,
-
         "monthlycharges": monthlycharges,
-
-        "totalcharges": totalcharges
     }
-
 
     try:
 
-        
         with st.spinner("Connecting to prediction API..."):
 
             health_response = requests.get(
                 HEALTH_URL,
                 timeout=10
             )
-
 
         if health_response.status_code != 200:
 
@@ -193,8 +109,6 @@ if predict_button:
 
             st.stop()
 
-
-      
         with st.spinner("Analyzing customer..."):
 
             response = requests.post(
@@ -202,7 +116,6 @@ if predict_button:
                 json=customer_data,
                 timeout=30
             )
-
 
         if response.status_code == 200:
 
@@ -224,8 +137,6 @@ if predict_button:
                 "risk_level"
             ]
 
-
-         
             st.success(
                 "✅ Prediction completed successfully!"
             )
@@ -234,14 +145,12 @@ if predict_button:
 
             col1, col2, col3 = st.columns(3)
 
-
             with col1:
 
                 st.metric(
                     "Churn Probability",
                     f"{probability * 100:.2f}%"
                 )
-
 
             with col2:
 
@@ -250,7 +159,6 @@ if predict_button:
                     churn
                 )
 
-
             with col3:
 
                 st.metric(
@@ -258,15 +166,12 @@ if predict_button:
                     risk_level
                 )
 
-
             st.subheader("Churn Risk")
 
             st.progress(
                 min(float(probability), 1.0)
             )
 
-
-       
             if risk_level == "HIGH":
 
                 st.error(
@@ -303,7 +208,6 @@ if predict_button:
                     """
                 )
 
-
             st.subheader("💡 Business Recommendation")
 
             if risk_level == "HIGH":
@@ -337,7 +241,6 @@ if predict_button:
                     """
                 )
 
-
             with st.expander(
                 "🔍 Model Information"
             ):
@@ -357,13 +260,11 @@ if predict_button:
                     f"{prediction}"
                 )
 
-
         else:
 
             st.error(
                 f"❌ API Error: {response.text}"
             )
-
 
     except requests.exceptions.ConnectionError:
 
@@ -376,7 +277,6 @@ if predict_button:
             `uv run uvicorn main:app --reload`
             """
         )
-
 
     except requests.exceptions.Timeout:
 
